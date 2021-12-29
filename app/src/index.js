@@ -4,18 +4,18 @@ import starNotaryArtifact from "../../build/contracts/StarNotary.json"; // Impor
 const App = {
   web3: null,
   account: null,
-  meta: null, //This object represent the Smart Contract
+  starNotary: null, //This object represent the Smart Contract
 
-  start: async function() {
+  start: async function () {
     const { web3 } = this;
 
     try {
       // get contract instance
       const networkId = await web3.eth.net.getId(); //This method find the network id to retrieve the configuration from truffle-config.js file
       const deployedNetwork = starNotaryArtifact.networks[networkId]; // Retrieve the Network configuration from truffle-config.js file
-      this.meta = new web3.eth.Contract( // Initializing the contract
+      this.starNotary = new web3.eth.Contract( // Initializing the contract
         starNotaryArtifact.abi,
-        deployedNetwork.address,
+        deployedNetwork.address
       );
 
       // get accounts
@@ -27,35 +27,34 @@ const App = {
   },
 
   // function to update the status message in the page
-  setStatus: function(message) {
+  setStatus: function (message) {
     const status = document.getElementById("status");
     status.innerHTML = message;
   },
 
   // function called to show the starName
-  starNameFunc: async function() {
-    const { starName } = this.meta.methods; // to be able to use the functions in your Smart Contract use destructuring to get the function to be call
+  starNameFunc: async function () {
+    const { starName } = this.starNotary.methods; // to be able to use the functions in your Smart Contract use destructuring to get the function to be call
     const response = await starName().call(); // calling the starName property from your Smart Contract.
-    const owner = document.getElementById("name"); // Updating Html
-    owner.innerHTML = response;
+    const name = document.getElementById("name"); // Updating Html
+    name.innerHTML = response;
   },
 
   // function called to show the starOwner
-  starOwnerFunc: async function() {
-    const { starOwner } = this.meta.methods; // to be able to use the functions in your Smart Contract use destructuring to get the function to be call
+  starOwnerFunc: async function () {
+    const { starOwner } = this.starNotary.methods; // to be able to use the functions in your Smart Contract use destructuring to get the function to be call
     const response = await starOwner().call(); // calling the starOwner property from your Smart Contract.
     const owner = document.getElementById("owner"); // Updating Html
     owner.innerHTML = response;
   },
 
   // function called to claim a Star
-  claimStarFunc: async function(){
-    const { claimStar, starOwner } = this.meta.methods; // to be able to use the functions in your Smart Contract use destructuring to get the function to be call
-    await claimStar().send({from: this.account}); // Use `send` instead of `call` when you called a function in your Smart Contract
+  claimStarFunc: async function () {
+    const { claimStar, starOwner } = this.starNotary.methods; // to be able to use the functions in your Smart Contract use destructuring to get the function to be call
+    await claimStar().send({ from: this.account }); // Use `send` instead of `call` when you called a function in your Smart Contract
     const response = await starOwner().call();
     App.setStatus("New Star Owner is " + response + ".");
-  }
-
+  },
 };
 
 window.App = App;
